@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>N3 语法</title>
+<style>
+/* ===== CSS Variables ===== */
+:root {
+  --bg: #f0f2f5;
+  --card-bg: #fff;
+  --text: #1a1a2e;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-heading: #1e293b;
+  --text-label: #6b7280;
+  --border: #e2e8f0;
+  --border-light: #f1f3f5;
+  --border-heavy: #d1d5db;
+  --primary: #4a6cf7;
+  --primary-light: rgba(74,108,247,.1);
+  --header-bg: #f8f9fc;
+  --header-hover: #eef1f6;
+  --card-bg-inner: #f8f9fa;
+  --done-bg: #f3f4f6;
+  --highlight-bg: #f0f4ff;
+  --highlight-border: #4a6cf7;
+  --muted-accent: #94a3b8;
+  --table-header-bg: #f1f5f9;
+  --hdr-gradient-start: #1a1a2e;
+  --hdr-gradient-end: #16213e;
+  --hdr-sub-color: #a0aec0;
+}
+
+/* ===== Reset ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===== Base ===== */
+body {
+  font-family: -apple-system, "Hiragino Sans", "Noto Sans CJK SC", "Segoe UI", sans-serif;
+  padding: 20px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ===== Page Header ===== */
+.hdr {
+  background: linear-gradient(135deg, var(--hdr-gradient-start), var(--hdr-gradient-end));
+  color: #fff;
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+.hdr h1 { font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+.hdr .sub { font-size: 12px; color: var(--hdr-sub-color); margin-top: 4px; }
+
+/* ===== Section ===== */
+.sec {
+  background: var(--card-bg);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  overflow: hidden;
+}
+.sec-hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  background: var(--header-bg);
+  border-bottom: 1px solid #edf2f7;
+}
+.sec-hdr:hover { background: var(--header-hover); }
+.sec-hdr .a { font-size: 11px; color: var(--hdr-sub-color); transition: transform .2s; }
+.sec-hdr .a.o { transform: rotate(90deg); }
+.sec-bd { display: none; padding: 0; }
+.sec-bd.o { display: block; }
+
+/* ===== Group (Category) ===== */
+.grp { position: relative; }
+.grp-hdr {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px 10px 28px;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  border-top: 1px solid var(--border-light);
+}
+.grp-hdr:hover { background: var(--header-bg); }
+.grp-hdr .a { font-size: 10px; color: var(--hdr-sub-color); transition: transform .2s; }
+.grp-hdr .a.o { transform: rotate(90deg); }
+.grp-bd {
+  display: none;
+  padding: 0 16px 14px 28px;
+  border-top: 1px solid var(--border-light);
+}
+.grp-bd.o { display: block; }
+.grp-note {
+  padding: 6px 0 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+.grp.done { background: var(--done-bg); opacity: .7; }
+.grp.done .grp-hdr { background: var(--done-bg); }
+.grp.highlight {
+  border-left: 3px solid var(--highlight-border);
+  background: var(--highlight-bg);
+}
+.grp.highlight .grp-hdr { background: var(--highlight-bg); }
+.grp-hdr input[type=checkbox] { margin: 0; cursor: pointer; flex-shrink: 0; }
+
+/* ===== Card Items ===== */
+.card {
+  background: var(--card-bg-inner);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+.card .c-hdr {
+  padding: 12px 14px 6px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.card .c-hdr .c-exp { font-weight: 400; color: var(--text-muted); margin-left: 4px; }
+.card .c-body { padding: 0 14px 8px; }
+.card .c-body .c-sent {
+  padding: 4px 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.card .c-body .c-sent::before { content: "* "; color: var(--muted-accent); }
+.card .c-inp {
+  display: block;
+  width: 100%;
+  margin: 2px 0 8px;
+  padding: 5px 7px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12.5px;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 30px;
+  background: #fff;
+}
+.card .c-inp:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+/* ===== Table Items (Keigo) ===== */
+.tbl-wrap {
+  background: var(--card-bg-inner);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+.tbl-sec-title {
+  font-weight: 700;
+  font-size: 14px;
+  padding: 12px 14px 10px;
+  color: var(--text-heading);
+  border-bottom: 1px solid var(--border);
+}
+.tbl-header-row {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  border-bottom: 2px solid var(--border-heavy);
+  background: var(--table-header-bg);
+}
+.tbl-header-cell {
+  display: table-cell;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-label);
+}
+.tbl-header-cell.l { width: 30%; }
+.tbl-header-cell.r { width: 70%; }
+.tbl-row {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  border-bottom: 1px solid var(--border-light);
+}
+.tbl-cell {
+  display: table-cell;
+  padding: 5px 14px;
+  font-size: 13px;
+  vertical-align: top;
+  white-space: pre-line;
+}
+.tbl-cell.l { width: 30%; font-weight: 600; color: #1f2937; }
+.tbl-cell.r { width: 70%; line-height: 1.7; color: var(--text-secondary); }
+.tbl-cell .sent { cursor: pointer; }
+.tbl-inp {
+  display: block;
+  width: 100%;
+  margin: 2px 0 8px;
+  padding: 5px 7px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12.5px;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 30px;
+  background: #fff;
+}
+.tbl-inp:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+/* ===== Utility ===== */
+.card .c-body .c-sent.hid { color: transparent; cursor: pointer; border-left: 3px solid #4a6cf7; padding-left: 8px; }
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>N3 语法</h1>
+  <div class="sub">日本語能力試験 · 文法整理</div>
+</div>
+<div id="root"></div>
+
+<script src="n3-grammar-data.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  var DATA = window.GRAMMAR_DATA;
+  var STORAGE_KEY = 'n3g';
+
+  // ---- Storage helpers ----
+  var store = {};
+  try { store = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) {}
+
+  // Normalize old format: ck-X-Y = true → ck-X-Y = { d: true }
+  for (var k in store) {
+    if (k.indexOf('ck-') === 0 && typeof store[k] !== 'object') {
+      store[k] = { d: store[k] };
+    }
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); } catch(e) {}
+  }
+
+  // ---- DOM helpers ----
+  function el(tag) { return document.createElement(tag); }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  // ---- Collapse toggle ----
+  function toggleCollapse(hdr) {
+    var arrow = hdr.querySelector('.a');
+    if (arrow) {
+      arrow.textContent = arrow.textContent === '\u25B6' ? '\u25BC' : '\u25B6';
+    }
+    hdr.nextElementSibling.classList.toggle('o');
+  }
+
+  // ---- Textarea input handler factory ----
+  function onDictationChange(dk) {
+    return function() {
+      store[dk] = this.value;
+      save();
+    };
+  }
+  function ensureDictation(dk) {
+    if (!(dk in store)) store[dk] = '';
+    return store[dk];
+  }
+
+  // ---- Checkbox change ----
+  function onCheckChange(si, gi) {
+    return function() {
+      var checked = this.checked;
+      store['ck-' + si + '-' + gi] = { d: checked };
+      save();
+      this.closest('.grp').className = 'grp' + (checked ? ' done' : '');
+    };
+  }
+
+
+  // ---- Render: Single card (used standalone, for mixed item arrays) ----
+  function renderSingleCard(it, idx, si, gi) {
+    var card = el('div');
+    card.className = 'card';
+
+    var hdr = el('div');
+    hdr.className = 'c-hdr';
+    hdr.appendChild(document.createTextNode((it.num || (idx + 1)) + '. ' + it.t));
+    if (it.e) {
+      var exp = el('span');
+      exp.className = 'c-exp';
+      exp.textContent = '【' + it.e + '】';
+      hdr.appendChild(exp);
+    }
+    card.appendChild(hdr);
+
+    if (it.s && it.s.length) {
+      var bd = el('div');
+      bd.className = 'c-body';
+      for (var si2 = 0; si2 < it.s.length; si2++) {
+        var snt = el('div');
+        snt.className = 'c-sent';
+        snt.textContent = it.s[si2];
+        snt.onclick = function() { this.classList.toggle('hid'); };
+        bd.appendChild(snt);
+
+        if (!it.noInput) {
+          var inp = el('textarea');
+          inp.className = 'c-inp';
+          inp.rows = 1;
+          inp.placeholder = '默写...';
+          var dk = 'di-' + si + '-' + gi + '-' + idx + '-' + si2;
+          inp.value = ensureDictation(dk);
+          inp.oninput = onDictationChange(dk);
+          bd.appendChild(inp);
+        }
+      }
+      card.appendChild(bd);
+    }
+    return card;
+  }
+
+  // ---- Render: Card format ----
+  function renderCardItems(items, si, gi) {
+    var card = el('div');
+    card.className = 'card';
+
+    for (var mi = 0; mi < items.length; mi++) {
+      var it = items[mi];
+
+      // Item header: "1. ～うちに… 【趁着~做…】"
+      var hdr = el('div');
+      hdr.className = 'c-hdr';
+      hdr.appendChild(document.createTextNode((it.num || (mi + 1)) + '. ' + it.t));
+      if (it.e) {
+        var exp = el('span');
+        exp.className = 'c-exp';
+        exp.textContent = '【' + it.e + '】';
+        hdr.appendChild(exp);
+      }
+      card.appendChild(hdr);
+
+      // Sentences + dictation inputs
+      if (it.s && it.s.length) {
+        var bd = el('div');
+        bd.className = 'c-body';
+        for (var si2 = 0; si2 < it.s.length; si2++) {
+          var snt = el('div');
+          snt.className = 'c-sent';
+          snt.textContent = it.s[si2];
+          snt.onclick = function() { this.classList.toggle('hid'); };
+          bd.appendChild(snt);
+
+          if (!it.noInput) {
+            var inp = el('textarea');
+            inp.className = 'c-inp';
+            inp.rows = 1;
+            inp.placeholder = '默写...';
+            var dk = 'di-' + si + '-' + gi + '-' + mi + '-' + si2;
+            inp.value = ensureDictation(dk);
+            inp.oninput = onDictationChange(dk);
+            bd.appendChild(inp);
+          }
+        }
+        card.appendChild(bd);
+      }
+    }
+    return card;
+  }
+
+  // ---- Render: Table format (keigo) ----
+  function renderTableItems(items, si, gi) {
+    var wr = el('div');
+    wr.className = 'tbl-wrap';
+
+    for (var mi = 0; mi < items.length; mi++) {
+      var it = items[mi];
+
+      if (it.h) {
+        // Section header within table (e.g. "尊敬語（目上の人の行為を言う）")
+        var st = el('div');
+        st.className = 'tbl-sec-title';
+        st.textContent = it.t;
+        wr.appendChild(st);
+
+        // Column header row: "普通の言い方" | secName
+        var htr = el('div');
+        htr.className = 'tbl-header-row';
+
+        var hc1 = el('div');
+        hc1.className = 'tbl-header-cell l';
+        hc1.textContent = '普通の言い方';
+        htr.appendChild(hc1);
+
+        var hc2 = el('div');
+        hc2.className = 'tbl-header-cell r';
+        hc2.textContent = it.rh || it.t.replace(/[\uFF08(].*/, '');
+        htr.appendChild(hc2);
+
+        wr.appendChild(htr);
+      } else {
+        // Data row: left label | right keigo form
+        var rv = it.r || '';
+        if (!rv) continue; // skip label-only rows like "（先生は）"
+
+        var lv = it.l || '';
+
+        var tr = el('div');
+        tr.className = 'tbl-row';
+
+        var tc1 = el('div');
+        tc1.className = 'tbl-cell l';
+        tc1.textContent = lv;
+        tr.appendChild(tc1);
+
+        var tc2 = el('div');
+        tc2.className = 'tbl-cell r';
+
+        var tx = el('div');
+        tx.className = 'sent';
+        tx.textContent = rv;
+        tx.onclick = function() { this.classList.toggle('hid'); };
+        tc2.appendChild(tx);
+
+        var inp = el('textarea');
+        inp.className = 'tbl-inp';
+        inp.placeholder = '默写...';
+        var dk = 'di-' + si + '-' + gi + '-' + mi + '-0';
+        inp.value = ensureDictation(dk);
+        inp.oninput = onDictationChange(dk);
+        tc2.appendChild(inp);
+
+        tr.appendChild(tc2);
+        wr.appendChild(tr);
+      }
+    }
+    return wr;
+  }
+
+  // ---- Render: Generic data table (N columns) ----
+  function renderDataTable(cfg, si, gi, mi) {
+    var wr = el('div');
+    wr.className = 'tbl-wrap';
+
+    var htr = el('div');
+    htr.className = 'tbl-header-row';
+    for (var ci = 0; ci < cfg.cols.length; ci++) {
+      var hc = el('div');
+      hc.className = 'tbl-header-cell';
+      if (cfg.widths && cfg.widths[ci]) hc.style.width = cfg.widths[ci];
+      hc.textContent = cfg.cols[ci];
+      htr.appendChild(hc);
+    }
+    wr.appendChild(htr);
+
+    for (var ri = 0; ri < cfg.rows.length; ri++) {
+      var row = cfg.rows[ri];
+      var isHeader = cfg.headerRows && cfg.headerRows.indexOf(ri) !== -1;
+      var tr = el('div');
+      tr.className = 'tbl-row';
+
+      for (var ci = 0; ci < cfg.cols.length; ci++) {
+        var tc = el('div');
+        tc.className = 'tbl-cell';
+        if (cfg.widths && cfg.widths[ci]) tc.style.width = cfg.widths[ci];
+        if (isHeader) { tc.style.fontWeight = '600'; tc.style.background = '#f1f5f9'; }
+        else if (cfg.boldCols && cfg.boldCols.indexOf(ci) !== -1) tc.style.fontWeight = '600';
+        if (ci === cfg.cols.length - 1) tc.style.lineHeight = '1.7';
+
+        var isNote = cfg.nonInteractiveRows && cfg.nonInteractiveRows.indexOf(ri) !== -1;
+        var isTargetCol = cfg.interactiveCols ? cfg.interactiveCols.indexOf(ci) !== -1 : ci === cfg.cols.length - 1;
+        var shouldInteract = !isHeader && !isNote && row[ci] && (cfg.allInteractive || isTargetCol);
+        if (shouldInteract) {
+          var tx = el('div');
+          tx.className = 'sent';
+          tx.textContent = row[ci];
+          tx.onclick = function() { this.classList.toggle('hid'); };
+          tc.appendChild(tx);
+
+          var inp = el('textarea');
+          inp.className = 'tbl-inp';
+          inp.placeholder = '默写...';
+          var dk = 'di-' + si + '-' + gi + (mi !== undefined ? '-' + mi : '') + '-' + ri + '-' + ci;
+          inp.value = ensureDictation(dk);
+          inp.oninput = onDictationChange(dk);
+          tc.appendChild(inp);
+        } else {
+          tc.textContent = row[ci] || '';
+        }
+
+        tr.appendChild(tc);
+      }
+      wr.appendChild(tr);
+    }
+
+    return wr;
+  }
+
+  // ---- Render: Group (category) ----
+  function renderGroup(cat, si, gi) {
+    var ck = store['ck-' + si + '-' + gi];
+    var isDone = ck && (ck.d || ck === true);
+
+    var gd = el('div');
+    gd.className = 'grp' + (isDone ? ' done' : '');
+
+    // Group header: [checkbox] [arrow] title
+    var gh = el('div');
+    gh.className = 'grp-hdr';
+
+    var cb = el('input');
+    cb.type = 'checkbox';
+    if (isDone) cb.checked = true;
+    cb.onchange = onCheckChange(si, gi);
+    cb.onclick = function(ev) { ev.stopPropagation(); };
+    gh.appendChild(cb);
+
+    var sp = el('span');
+    sp.className = 'a';
+    sp.textContent = '\u25B6';
+    gh.appendChild(sp);
+
+    gh.appendChild(document.createTextNode(' ' + cat.t));
+    gh.onclick = function() { toggleCollapse(this); };
+    gd.appendChild(gh);
+
+   // Group body
+   var gb = el('div');
+   gb.className = 'grp-bd';
+
+    if (cat.note) {
+      var noteEl = el('div');
+      noteEl.className = 'grp-note';
+      noteEl.textContent = cat.note;
+      gb.appendChild(noteEl);
+    }
+
+   if (cat.items) {
+      if (cat.items.cols) {
+        gb.appendChild(renderDataTable(cat.items, si, gi));
+      } else if (cat.items.length && cat.items[0].h !== undefined) {
+        gb.appendChild(renderTableItems(cat.items, si, gi));
+      } else if (cat.items.length) {
+        var hasMixedTable = false;
+        for (var _i = 0; _i < cat.items.length; _i++) { if (cat.items[_i].cols) { hasMixedTable = true; break; } }
+        if (hasMixedTable) {
+          for (var mi = 0; mi < cat.items.length; mi++) {
+            if (cat.items[mi].cols) {
+              gb.appendChild(renderDataTable(cat.items[mi], si, gi, mi));
+            } else {
+              gb.appendChild(renderSingleCard(cat.items[mi], mi, si, gi));
+            }
+          }
+        } else {
+          gb.appendChild(renderCardItems(cat.items, si, gi));
+        }
+      }
+    }
+
+    gd.appendChild(gb);
+    return gd;
+  }
+
+  // ---- Render: Section ----
+  function renderSection(sec, si) {
+    var sd = el('div');
+    sd.className = 'sec';
+
+    var sh = el('div');
+    sh.className = 'sec-hdr';
+    sh.innerHTML = '<span class="a">\u25B6</span>' + esc(sec.t);
+    sh.onclick = function() { toggleCollapse(this); };
+    sd.appendChild(sh);
+
+    var sb = el('div');
+    sb.className = 'sec-bd';
+    for (var gi = 0; gi < sec.c.length; gi++) {
+      sb.appendChild(renderGroup(sec.c[gi], si, gi));
+    }
+    sd.appendChild(sb);
+    return sd;
+  }
+
+  // ---- Render: App ----
+  function renderApp() {
+    var root = document.getElementById('root');
+    for (var si = 0; si < DATA.length; si++) {
+      root.appendChild(renderSection(DATA[si], si));
+    }
+  }
+
+  // ---- Auto-scroll to first incomplete group ----
+  function scrollToFirstIncomplete() {
+    for (var si = 0; si < DATA.length; si++) {
+      var sdiv = document.querySelectorAll('.sec')[si];
+      if (!sdiv) continue;
+
+      var sb = sdiv.querySelector('.sec-bd');
+      for (var gi = 0; gi < DATA[si].c.length; gi++) {
+        var ck = store['ck-' + si + '-' + gi];
+        if (!ck || (!ck.d && ck !== true)) {
+          // Expand section
+          sb.classList.add('o');
+          var sa = sdiv.querySelector('.sec-hdr .a');
+          if (sa) sa.textContent = '\u25BC';
+
+          // Expand group & highlight
+          var grps = sb.querySelectorAll('.grp');
+          if (grps[gi]) {
+            var arr = grps[gi].querySelector('.a');
+            if (arr) arr.textContent = '\u25BC';
+            var gb = grps[gi].querySelector('.grp-bd');
+            if (gb) gb.classList.add('o');
+            grps[gi].classList.add('highlight');
+            grps[gi].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return;
+        }
+      }
+    }
+  }
+
+  // ---- Init ----
+  renderApp();
+  scrollToFirstIncomplete();
+})();
+</script>
+</body>
+</html>
