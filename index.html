@@ -139,8 +139,14 @@ body {
   color: var(--text-secondary);
   cursor: pointer;
 }
-.card .c-body .c-sent::before { content: "* "; color: var(--muted-accent); }
-.card .c-inp {
+ .card .c-body .c-sent::before { content: "* "; color: var(--muted-accent); }
+  .card .c-body .c-trans {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 1px 0 2px 12px;
+    line-height: 1.5;
+  }
+ .card .c-inp {
   display: block;
   width: 100%;
   margin: 2px 0 8px;
@@ -206,8 +212,9 @@ body {
 }
 .tbl-cell.l { width: 30%; font-weight: 600; color: #1f2937; }
 .tbl-cell.r { width: 70%; line-height: 1.7; color: var(--text-secondary); }
-.tbl-cell .sent { cursor: pointer; }
-.tbl-inp {
+ .tbl-cell .sent { cursor: pointer; }
+  .tbl-cell .sent.hid { opacity: 0; }
+ .tbl-inp {
   display: block;
   width: 100%;
   margin: 2px 0 8px;
@@ -228,7 +235,8 @@ body {
 }
 
 /* ===== Utility ===== */
-.card .c-body .c-sent.hid { color: transparent; cursor: pointer; border-left: 3px solid #4a6cf7; padding-left: 8px; }
+ .card .c-body .c-sent.hid { color: transparent; cursor: pointer; border-left: 3px solid #4a6cf7; padding-left: 8px; }
+  .hid { opacity: 0; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -323,6 +331,13 @@ body {
         snt.onclick = function() { this.classList.toggle('hid'); };
         bd.appendChild(snt);
 
+        if (it.c && it.c[si2]) {
+          var trEl = el('div');
+          trEl.className = 'c-trans';
+          trEl.textContent = it.c[si2];
+          bd.appendChild(trEl);
+        }
+
         if (!it.noInput) {
           var inp = el('textarea');
           inp.className = 'c-inp';
@@ -369,10 +384,16 @@ body {
           snt.textContent = it.s[si2];
           snt.onclick = function() { this.classList.toggle('hid'); };
           bd.appendChild(snt);
+          if (it.c && it.c[si2]) {
+            var trEl = el('div');
+            trEl.className = 'c-trans';
+            trEl.textContent = it.c[si2];
+            bd.appendChild(trEl);
+          }
 
-          if (!it.noInput) {
-            var inp = el('textarea');
-            inp.className = 'c-inp';
+         if (!it.noInput) {
+           var inp = el('textarea');
+           inp.className = 'c-inp';
             inp.rows = 1;
             inp.placeholder = '默写...';
             var dk = 'di-' + si + '-' + gi + '-' + mi + '-' + si2;
@@ -440,6 +461,12 @@ body {
         tx.textContent = rv;
         tx.onclick = function() { this.classList.toggle('hid'); };
         tc2.appendChild(tx);
+        if (it.c) {
+          var trEl = el('div');
+          trEl.className = 'c-trans';
+          trEl.textContent = it.c;
+          tc2.appendChild(trEl);
+        }
 
         var inp = el('textarea');
         inp.className = 'tbl-inp';
@@ -495,6 +522,12 @@ body {
           tx.textContent = row[ci];
           tx.onclick = function() { this.classList.toggle('hid'); };
           tc.appendChild(tx);
+          if (cfg.c && cfg.c[ri]) {
+            var trEl = el('div');
+            trEl.className = 'c-trans';
+            trEl.textContent = cfg.c[ri];
+            tc.appendChild(trEl);
+          }
 
           var inp = el('textarea');
           inp.className = 'tbl-inp';
